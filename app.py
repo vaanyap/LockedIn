@@ -1,7 +1,8 @@
 import streamlit as st
-from posture_detector import posture_detector
+from posture_detector import detect_posture  # Corrected import
 from ai_assistant import study_buddy_chat
 from goal_page import goal_page
+import cv2
 
 # Set a modern background and improved global CSS
 st.markdown(
@@ -36,50 +37,6 @@ st.markdown(
             margin: 20px 0;
         }
 
-        .auth-container {
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .form-container {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 400px;
-            margin: 20px auto;
-        }
-
-        .form-container h3 {
-            color: #333;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-        }
-
-        input[type='text'], input[type='email'], input[type='password'] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 1.1em;
-        }
-
-        .auth-button {
-            background-color: #4ca2cd;
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 5px;
-            font-size: 1.1em;
-            cursor: pointer;
-        }
-
-        .auth-button:hover {
-            background-color: #67b26f;
-        }
-
         .sidebar-title {
             font-size: 1.5em;
             font-weight: bold;
@@ -94,6 +51,36 @@ st.markdown(
             color: #555;
         }
 
+        /* Button Styling */
+        .stButton button {
+            background-color: #4ca2cd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+        }
+
+        .stButton button:hover {
+            background-color: #5cb3d6;
+            color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .stButton button:active {
+            transform: scale(0.98);
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            text-align: left;
+            margin-bottom: 20px;
+        }
     </style>
     """,
     unsafe_allow_html=True
@@ -102,17 +89,18 @@ st.markdown(
 # Navigation setup using Streamlit's st.session_state
 if "page" not in st.session_state:
     st.session_state.page = "Homepage"
-if "auth_state" not in st.session_state:
-    st.session_state.auth_state = None
-if "user" not in st.session_state:
-    st.session_state.user = None  # Track the logged-in user
 
 # Sidebar for navigation
-st.sidebar.title("Navigation")
+st.sidebar.title("📚 Navigation")
 st.sidebar.markdown("<span class='sidebar-title'>📋 Choose a section:</span>", unsafe_allow_html=True)
 page = st.sidebar.radio(
     "Go to:",
-    ("Homepage", "Goal Tracker", "Posture Detector", "Study Buddy AI Chat"),
+    (
+        "🏠 Homepage",
+        "🎯 Goal Tracker",
+        "📏 Posture Detector",
+        "🤖 Study Buddy AI Chat"
+    ),
     label_visibility="collapsed"  # hides label for a cleaner look
 )
 st.session_state.page = page
@@ -123,70 +111,52 @@ def homepage():
     st.markdown(
         """
         <div class='content'>
-        Study Hub is your one-stop solution for focused learning, mindfulness, and achieving your study goals.<br>
+        <strong>Study Hub</strong> is your one-stop solution for focused learning, mindfulness, and achieving your study goals.<br>
         Navigate to different sections using the menu to explore features like goal tracking, posture detection, and AI assistance.
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # If user is not logged in, show Sign In / Sign Up options
-    if not st.session_state.user:
-        st.markdown("<div class='auth-container'>", unsafe_allow_html=True)
-        col1, col2 = st.columns([1, 1], gap="large")
+# Posture Detection functionality
+def video_feed():
+    # Open the webcam
+    cap = cv2.VideoCapture(0)
 
-        with col1:
-            if st.button("Sign In", key="sign_in_button", help="Click to sign in", use_container_width=True):
-                st.session_state.auth_state = "sign_in"
+    # Create placeholders for the image display and posture feedback
+    image_placeholder = st.empty()
+    feedback_placeholder = st.empty()
 
-        with col2:
-            if st.button("Sign Up", key="sign_up_button", help="Click to sign up", use_container_width=True):
-                st.session_state.auth_state = "sign_up"
+    while True:
+        ret, frame = cap.read()  # Read frame from webcam
+        if not ret:
+            break
 
-        if st.session_state.auth_state == "sign_in":
-            st.markdown(
-                """
-                <div class='form-container'>
-                    <h3>Sign In</h3>
-                    <form>
-                        <label for='username'>Username:</label><br>
-                        <input type='text' id='username' name='username'><br><br>
-                        <label for='password'>Password:</label><br>
-                        <input type='password' id='password' name='password'><br><br>
-                        <button type='submit' class='auth-button'>Sign In</button>
-                    </form>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+        # Perform posture detection
+        frame, posture_text = detect_posture(frame)
 
-        elif st.session_state.auth_state == "sign_up":
-            st.markdown(
-                """
-                <div class='form-container'>
-                    <h3>Sign Up</h3>
-                    <form>
-                        <label for='username'>Username:</label><br>
-                        <input type='text' id='username' name='username'><br><br>
-                        <label for='email'>Email:</label><br>
-                        <input type='email' id='email' name='email'><br><br>
-                        <label for='password'>Password:</label><br>
-                        <input type='password' id='password' name='password'><br><br>
-                        <button type='submit' class='auth-button'>Sign Up</button>
-                    </form>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-    else:
-        st.markdown("<div class='content'>Welcome back, {}</div>".format(st.session_state.user), unsafe_allow_html=True)
+        # Convert BGR frame to RGB for Streamlit compatibility
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # Update the image in the placeholder (this avoids creating new Streamlit elements)
+        image_placeholder.image(frame, channels="RGB", use_container_width=True)
+
+        # Update posture feedback text
+        feedback_placeholder.text(posture_text)
+
+    cap.release()  # Release the webcam once done
 
 # Main page rendering logic based on selected navigation
-if st.session_state.page == "Homepage":
+if st.session_state.page == "🏠 Homepage":
     homepage()
-elif st.session_state.page == "Goal Tracker":
+elif st.session_state.page == "🎯 Goal Tracker":
+    st.markdown("<div class='section-header'><span class='icon'>🎯</span>Goal Tracker</div>", unsafe_allow_html=True)
     goal_page()
-elif st.session_state.page == "Posture Detector":
-    posture_detector()
-elif st.session_state.page == "Study Buddy AI Chat":
+elif st.session_state.page == "📏 Posture Detector":
+    st.markdown("<div class='section-header'><span class='icon'>📏</span>Posture Detection App</div>", unsafe_allow_html=True)
+    # Streamlit component to start the video feed
+    if st.button("Start Posture Detection"):
+        video_feed()
+elif st.session_state.page == "🤖 Study Buddy AI Chat":
+    st.markdown("<div class='section-header'><span class='icon'>🤖</span>Study Buddy AI Chat</div>", unsafe_allow_html=True)
     study_buddy_chat()
