@@ -2,7 +2,6 @@ import streamlit as st
 from posture_detector import posture_detector
 from ai_assistant import study_buddy_chat
 from goal_page import goal_page
-from profile import profile_page
 
 # Set a modern background and improved global CSS
 st.markdown(
@@ -113,7 +112,7 @@ st.sidebar.title("Navigation")
 st.sidebar.markdown("<span class='sidebar-title'>📋 Choose a section:</span>", unsafe_allow_html=True)
 page = st.sidebar.radio(
     "Go to:",
-    ("Homepage", "Goal Tracker", "Posture Detector", "Study Buddy AI Chat", "Profile"),
+    ("Homepage", "Goal Tracker", "Posture Detector", "Study Buddy AI Chat"),
     label_visibility="collapsed"  # hides label for a cleaner look
 )
 st.session_state.page = page
@@ -191,5 +190,3 @@ elif st.session_state.page == "Posture Detector":
     posture_detector()
 elif st.session_state.page == "Study Buddy AI Chat":
     study_buddy_chat()
-elif st.session_state.page == "Profile":
-    profile_page()
