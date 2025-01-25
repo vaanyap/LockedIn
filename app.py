@@ -1,79 +1,100 @@
 import streamlit as st
-from mediapipe import solutions as mp_solutions
+from posture_detector import posture_detector
+from ai_assistant import study_buddy_chat
+from goal_page import goal_page
+from profile import profile_page
 
-# Set a soft blue background color and add global styling using CSS
+# Set a modern background and improved global CSS
 st.markdown(
     """
     <style>
-        /* Apply a background color to the body */
         body {
-            background-color: #e6f7ff !important;
+            background: linear-gradient(135deg, #67b26f, #4ca2cd) !important;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
         }
+
+        /* Global Styles */
         .title {
             font-size: 2.5em;
             font-weight: bold;
-            color: #004080;
+            color: #000;
             text-align: center;
-            margin-bottom: 20px;
+            padding: 30px 0;
         }
-        .content {
-            font-size: 1.2em;
-            color: #333;
-            line-height: 1.6;
-            margin: 20px;
-        }
+
         .icon {
             font-size: 1.5em;
-            color: #0073e6;
-            vertical-align: middle;
             margin-right: 10px;
         }
+
+        .content {
+            font-size: 1.1em;
+            color: #000;
+            text-align: center;
+            margin: 20px 0;
+        }
+
         .auth-container {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 40px;
         }
+
+        .form-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .form-container h3 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        input[type='text'], input[type='email'], input[type='password'] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 1.1em;
+        }
+
         .auth-button {
-            background-color: #4CAF50;
+            background-color: #4ca2cd;
             color: white;
-            padding: 10px 20px;
             border: none;
+            padding: 10px;
+            width: 100%;
             border-radius: 5px;
             font-size: 1.1em;
             cursor: pointer;
-            margin: 10px;
-            transition: background-color 0.3s ease;
         }
+
         .auth-button:hover {
-            background-color: #45a049;
+            background-color: #67b26f;
         }
-        .form-container {
+
+        .sidebar-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .sidebar-radio {
             margin-top: 20px;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            width: 50%;
-            margin-left: auto;
-            margin-right: auto;
         }
-        .chat-container {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            width: 70%;
-            margin-left: auto;
-            margin-right: auto;
+
+        .sidebar-markdown {
+            font-size: 1.1em;
+            color: #555;
         }
-        .chat-message {
-            padding: 10px;
-            background: #f1f1f1;
-            margin: 5px;
-            border-radius: 5px;
-        }
-        .button-container {
-            text-align: center;
-        }
+
     </style>
     """,
     unsafe_allow_html=True
@@ -84,10 +105,20 @@ if "page" not in st.session_state:
     st.session_state.page = "Homepage"
 if "auth_state" not in st.session_state:
     st.session_state.auth_state = None
+if "user" not in st.session_state:
+    st.session_state.user = None  # Track the logged-in user
 
-def navigate_to(page):
-    st.session_state.page = page
+# Sidebar for navigation
+st.sidebar.title("Navigation")
+st.sidebar.markdown("<span class='sidebar-title'>📋 Choose a section:</span>", unsafe_allow_html=True)
+page = st.sidebar.radio(
+    "Go to:",
+    ("Homepage", "Goal Tracker", "Posture Detector", "Study Buddy AI Chat", "Profile"),
+    label_visibility="collapsed"  # hides label for a cleaner look
+)
+st.session_state.page = page
 
+# Define homepage function
 def homepage():
     st.markdown("<div class='title'><span class='icon'>🏠</span>Welcome to Study Hub</div>", unsafe_allow_html=True)
     st.markdown(
@@ -100,135 +131,58 @@ def homepage():
         unsafe_allow_html=True
     )
 
-    # Sign In / Sign Up section
-    st.markdown("<div class='auth-container'>", unsafe_allow_html=True)
+    # If user is not logged in, show Sign In / Sign Up options
+    if not st.session_state.user:
+        st.markdown("<div class='auth-container'>", unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 1], gap="large")
 
-    col1, col2 = st.columns([1, 1], gap="large")
+        with col1:
+            if st.button("Sign In", key="sign_in_button", help="Click to sign in", use_container_width=True):
+                st.session_state.auth_state = "sign_in"
 
-    with col1:
-        if st.button("Sign In", key="sign_in_button", help="Click to sign in", 
-                     use_container_width=True):
-            st.session_state.auth_state = "sign_in"
+        with col2:
+            if st.button("Sign Up", key="sign_up_button", help="Click to sign up", use_container_width=True):
+                st.session_state.auth_state = "sign_up"
 
-    with col2:
-        if st.button("Sign Up", key="sign_up_button", help="Click to sign up", 
-                     use_container_width=True):
-            st.session_state.auth_state = "sign_up"
+        if st.session_state.auth_state == "sign_in":
+            st.markdown(
+                """
+                <div class='form-container'>
+                    <h3>Sign In</h3>
+                    <form>
+                        <label for='username'>Username:</label><br>
+                        <input type='text' id='username' name='username'><br><br>
+                        <label for='password'>Password:</label><br>
+                        <input type='password' id='password' name='password'><br><br>
+                        <button type='submit' class='auth-button'>Sign In</button>
+                    </form>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-    if st.session_state.auth_state == "sign_in":
-        st.markdown(
-            """
-            <div class='form-container'>
-                <h3>Sign In</h3>
-                <form>
-                    <label for='username'>Username:</label><br>
-                    <input type='text' id='username' name='username'><br><br>
-                    <label for='password'>Password:</label><br>
-                    <input type='password' id='password' name='password'><br><br>
-                    <button type='submit' class='auth-button'>Sign In</button>
-                </form>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        elif st.session_state.auth_state == "sign_up":
+            st.markdown(
+                """
+                <div class='form-container'>
+                    <h3>Sign Up</h3>
+                    <form>
+                        <label for='username'>Username:</label><br>
+                        <input type='text' id='username' name='username'><br><br>
+                        <label for='email'>Email:</label><br>
+                        <input type='email' id='email' name='email'><br><br>
+                        <label for='password'>Password:</label><br>
+                        <input type='password' id='password' name='password'><br><br>
+                        <button type='submit' class='auth-button'>Sign Up</button>
+                    </form>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+    else:
+        st.markdown("<div class='content'>Welcome back, {}</div>".format(st.session_state.user), unsafe_allow_html=True)
 
-    elif st.session_state.auth_state == "sign_up":
-        st.markdown(
-            """
-            <div class='form-container'>
-                <h3>Sign Up</h3>
-                <form>
-                    <label for='username'>Username:</label><br>
-                    <input type='text' id='username' name='username'><br><br>
-                    <label for='email'>Email:</label><br>
-                    <input type='email' id='email' name='email'><br><br>
-                    <label for='password'>Password:</label><br>
-                    <input type='password' id='password' name='password'><br><br>
-                    <button type='submit' class='auth-button'>Sign Up</button>
-                </form>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-def goal_page():
-    st.markdown("<div class='title'><span class='icon'>🎯</span>Goal Tracker</div>", unsafe_allow_html=True)
-    goal = st.text_input("What is your primary goal for today?")
-    st.markdown(
-        """
-        <div class='content'>
-        - Add smaller sub-goals below to break your primary goal into actionable steps.<br>
-        - Check them off as you progress!
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    if goal:
-        st.markdown(f"<div class='content'>Your main goal is: {goal}</div>", unsafe_allow_html=True)
-
-    if st.button("Add sub-goal"):
-        st.markdown("<div class='content'>Feature to add sub-goals coming soon!</div>", unsafe_allow_html=True)
-
-def posture_detector():
-    st.markdown("<div class='title'><span class='icon'>🪑</span>Posture Detector</div>", unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div class='content'>
-        Ensure you're sitting correctly for optimal focus and health.<br>
-        Feature uses MediaPipe for posture analysis.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    uploaded_video = st.file_uploader("Upload a video of yourself sitting (MP4 format):", type="mp4")
-
-    if uploaded_video:
-        st.video(uploaded_video)
-        st.markdown("<div class='content'>Processing your posture... Feature coming soon!</div>", unsafe_allow_html=True)
-
-# New Study Buddy AI Chat Assistant Page
-def study_buddy_chat():
-    st.markdown("<div class='title'><span class='icon'>🤖</span>Study Buddy AI Chat</div>", unsafe_allow_html=True)
-    
-    st.markdown(
-        """
-        <div class='content'>
-        Chat with your AI Study Buddy for personalized study tips, motivation, and guidance.<br>
-        Just type your message below, and the AI will respond accordingly!
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Create a simple chat interface
-    if 'messages' not in st.session_state:
-        st.session_state.messages = []
-
-    # Display previous messages
-    for msg in st.session_state.messages:
-        st.markdown(f"<div class='chat-message'>{msg}</div>", unsafe_allow_html=True)
-
-    # Input field for chat
-    user_input = st.text_input("Type your message:", key="chat_input")
-    if st.button("Send"):
-        if user_input:
-            # Add user input to the chat
-            st.session_state.messages.append(f"You: {user_input}")
-            # Simple AI response (can be replaced with actual AI model)
-            st.session_state.messages.append(f"Study Buddy: Let me help you with that! (AI is still learning...)")
-            st.experimental_rerun()
-
-# Sidebar for navigation
-st.sidebar.title("Navigation")
-st.sidebar.markdown("<span class='icon'>📋</span> Choose a section:", unsafe_allow_html=True)
-page = st.sidebar.radio(
-    "Go to:",
-    ("Homepage", "Goal Tracker", "Posture Detector", "Study Buddy AI Chat")
-)
-st.session_state.page = page
-
-# Page rendering based on navigation
+# Main page rendering logic based on selected navigation
 if st.session_state.page == "Homepage":
     homepage()
 elif st.session_state.page == "Goal Tracker":
@@ -237,3 +191,5 @@ elif st.session_state.page == "Posture Detector":
     posture_detector()
 elif st.session_state.page == "Study Buddy AI Chat":
     study_buddy_chat()
+elif st.session_state.page == "Profile":
+    profile_page()
