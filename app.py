@@ -1,3 +1,4 @@
+from subprocess import Popen
 import streamlit as st
 from streamlit.components.v1 import html
 import requests
@@ -5,9 +6,8 @@ import time
 from goal_page import goal_page
 from ai_assistant import render_study_buddy_ai_chat 
 import socket
-from yoga import render_generated_code
-import tempfile
 import os
+
 
 # Apply the custom gradient background using HTML and CSS
 st.markdown(
@@ -165,8 +165,8 @@ with st.sidebar:
     st.markdown('<div class="sidebar"><h1>LockedIn 👩‍💻</h1></div>', unsafe_allow_html=True)
     st.markdown('<a href="#goal-tracker" class="sidebar">🎯 Goal Tracker</a>', unsafe_allow_html=True)
     st.markdown('<a href="#posture-monitor" class="sidebar">📏 Posture Monitor</a>', unsafe_allow_html=True)
-    st.markdown('<a href="#yoga-break" class="sidebar">🧘🏻‍♀️Yoga Break</a>', unsafe_allow_html=True)
-    st.markdown('<a href="#study-buddy-ai-chat" class="sidebar">🤖 Study Buddy AI Chat</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#study-buddy-ai-chat" class="sidebar">🦉 Study Buddy AI Chat</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#genai" class="sidebar">💃 Generate AI Insights</a>', unsafe_allow_html=True)
 
 
 # Info Section for the Study Hub
@@ -438,51 +438,18 @@ study_timer_input()
 
 
 
+
+
+
+
+
 # Add a section divider here
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 
 
 # Study Buddy AI Chat Section
-st.header("🧘🏻‍♀️ YOGA BREAK", anchor="yoga-break")
-st.write("Chat with Echo, your AI study assistant, to get personalized help with academic queries.")
-st.markdown('<div id="d3f4e54a"></div>', unsafe_allow_html=True)
-
-# Yoga Pose Code Generator Section
-st.title("Yoga Pose Code Generator")
-
-# Description of the app
-st.write("Enter the yoga pose description, and I will generate Python code to verify if you're performing it correctly using mediapipe and OpenCV!")
-
-# Input box for pose description
-pose_description = st.text_input("Enter yoga pose description:", "downward dog")
-
-# Button to generate and run code
-if st.button("Generate and Run Code"):
-    if pose_description:
-        # Generate the Python code for the pose
-        generated_code = render_generated_code(pose_description)
-        
-        # Use tempfile to save and execute the generated code
-        with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.py') as temp_file:
-            temp_file.write(generated_code)  # Write generated code to temp file
-            temp_file_path = temp_file.name  # Get the path of the temp file
-
-            try:
-                # Run the generated code without showing it
-                result = os.system(f"python {temp_file_path}")  # Execute the code
-                if result != 0:
-                    st.error("Error running the generated code.")
-            except Exception as e:
-                st.error(f"Error running generated code: {e}")
-            finally:
-                # Optional: clean up the temporary file after execution
-                os.remove(temp_file_path)
-    else:
-        st.error("Please enter a yoga pose description.")
-
-# Study Buddy AI Chat Section
-st.header("🤖 Study Buddy AI Chat", anchor="study-buddy-ai-chat")
+st.header("🦉 Study Buddy AI Chat", anchor="study-buddy-ai-chat")
 st.write("Chat with Echo, your AI study assistant, to get personalized help with academic queries.")
 st.markdown('<div id="d3f4e54a"></div>', unsafe_allow_html=True)
 st.markdown(
@@ -500,6 +467,19 @@ st.markdown(
 
 render_study_buddy_ai_chat()
 
+
+# Add a section divider here
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+# GenAI Integration Section (new section for calling genAi.py)
+st.header("💃 Get Moving AI Generate a Stretch Guide", anchor="genai")
+st.write("Generate a stetch guide using the AI model. Click below to run the AI generation script. [BETA feature]")
+# Add a button to run genAi.py
+if st.button("Run AI Generation"):
+    # Run the Python script `genAi.py` (assuming it exists in your working directory)
+    process = Popen(['python', 'genAi.py'], cwd=os.getcwd())
+    process.wait()  # Wait for the process to finish before proceeding
+    st.write("AI Generation is complete!")
 
 # Add a section divider here
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -601,12 +581,3 @@ if __name__ == "__main__":
         print(f"Port {port} is in use. Trying port {port + 1}...")
         port += 1
     app.run(host="0.0.0.0", port=port)
-
-
-
-    
-    
-    
-   
-   
-   
