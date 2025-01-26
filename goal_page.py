@@ -2,8 +2,7 @@ import streamlit as st
 
 # Function to display the goal page
 def goal_page():
-    # Set the page title and description
-    st.title("Set Your Goal")
+
     st.write("Enter your goal and track your progress below.")
     
     # Input for the user to set their goal
@@ -30,6 +29,7 @@ def goal_page():
         # Display tasks with checkboxes
         if st.session_state.tasks:
             st.write("Your tasks:")
+            incomplete_tasks = []  # New list for tasks that aren't completed
             for i, task_info in enumerate(st.session_state.tasks):
                 task_label = task_info["task"]
                 is_checked = task_info["completed"]
@@ -37,9 +37,16 @@ def goal_page():
                 # Create a checkbox for each task and track if it's completed
                 task_completed = st.checkbox(task_label, value=is_checked, key=f"task_{i}")
                 
-                # Update the completion status when the checkbox is clicked
+                # If the task is checked, mark it as completed and do not add it back to incomplete tasks
                 if task_completed != is_checked:
                     st.session_state.tasks[i]["completed"] = task_completed
+                
+                # Only add incomplete tasks back to the list
+                if not task_completed:
+                    incomplete_tasks.append(task_info)
+
+            # Only update the session state after rendering, keeping incomplete tasks
+            st.session_state.tasks = incomplete_tasks
 
             st.success("Progress saved!")
 
