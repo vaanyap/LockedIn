@@ -196,7 +196,7 @@ def get_video_response(video_uri: str, prompt: str):
 
 # Streamlit app UI
 def render_study_buddy_ai_chat():
-    st.title("Echo - Your AI Academic Support Owl!🦉")
+    st.title("Echo - Your AI Academic Support Owl!")
     st.image("src/echoTheOwl.png", width=200)  # Replace with your mascot image path
     st.write("Hey! My name is Echo and I'm your AI support owl! I'm here to help you with any of your academic inquiries. Let's spread our wings and get to work! 📚")
 
