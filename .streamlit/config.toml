@@ -1,0 +1,13 @@
+[theme]
+primaryColor = "#4F8DF7"  # Light blue, matching the gradient
+backgroundColor = "#E5F3F9"  # Very light cyan, soft background color
+secondaryBackgroundColor = "#f7f9fb"  # Lighter background for sidebar, very neutral
+textColor = "#333"  # Standard dark text color
+font = "sans serif"  # Modern font type
+
+
+
+# Customize the style of buttons, sliders, and other widgets
+buttonColor = "#1c51a7"
+buttonTextColor = "#ffffff"
+fontSize = "16px"
