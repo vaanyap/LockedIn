@@ -442,7 +442,6 @@ study_timer_input()
 # Add a section divider here
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-
 import streamlit as st
 import mediapipe as mp
 import cv2
@@ -452,9 +451,70 @@ mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
 mp_drawing = mp.solutions.drawing_utils
 
-# Function to generate Python code based on pose description
-def render_generated_code(pose_description):
-    return f"""
+# Function to capture and validate pose in the background
+def capture_and_verify_pose(frame_placeholder):
+    cap = cv2.VideoCapture(0)
+    
+    if not cap.isOpened():
+        st.error("Could not open webcam.")
+        return
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            st.error("Failed to grab frame.")
+            break
+
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(image)
+
+        # Initialize pose status
+        pose_status = "Verifying Pose..."
+
+        if results.pose_landmarks:
+            mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+            flipped_frame = cv2.flip(frame, 1)
+            # Pose validation (simplified for demonstration)
+            landmarks = results.pose_landmarks.landmark
+            if landmarks[11].y < landmarks[12].y:  # Example: check for Downward Dog pose
+                pose_status = "Pose Correct!"
+                flipped_frame = cv2.putText(flipped_frame, pose_status, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            else:
+                pose_status = "Incorrect Pose"
+                flipped_frame = cv2.putText(flipped_frame, pose_status, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+
+        # Horizontally flip the image (not the text)
+        
+
+        # Display webcam feed with pose status in Streamlit
+        frame_placeholder.image(flipped_frame, channels="BGR", caption="Yoga Pose Verification", use_container_width=True)
+
+    cap.release()
+
+# Streamlit UI setup
+st.header("🧘🏻‍♀️ YOGA BREAK", anchor="yoga-break")
+st.write("Chat with Echo, your AI study assistant, to get personalized help with academic queries.")
+st.markdown('<div id="d3f4e54a"></div>', unsafe_allow_html=True)
+
+# Yoga Pose Code Generator Section
+st.title("Yoga Pose Code Generator")
+
+# Description of the app
+st.write("Enter the yoga pose description, and I will generate Python code to verify if you're performing it correctly using mediapipe and OpenCV!")
+
+# Input box for pose description with a unique key
+pose_description = st.text_input("Enter yoga pose description:", "downward dog", key="yoga_pose_input")
+
+# Generate Code Button
+generate_button = st.button("Generate Code")
+
+# Create a placeholder for the webcam feed
+frame_placeholder = st.empty()
+
+# Handle the pose verification and code generation properly
+if generate_button:
+    # Generate the code for pose verification
+    code = f"""
 import mediapipe as mp
 import cv2
 
@@ -489,64 +549,10 @@ while cap.isOpened():
 cap.release()
 cv2.destroyAllWindows()
     """
-
-# Streamlit UI setup
-st.header("🧘🏻‍♀️ YOGA BREAK", anchor="yoga-break")
-st.write("Chat with Echo, your AI study assistant, to get personalized help with academic queries.")
-st.markdown('<div id="d3f4e54a"></div>', unsafe_allow_html=True)
-
-# Yoga Pose Code Generator Section
-st.title("Yoga Pose Code Generator")
-
-# Description of the app
-st.write("Enter the yoga pose description, and I will generate Python code to verify if you're performing it correctly using mediapipe and OpenCV!")
-
-# Input box for pose description with a unique key
-pose_description = st.text_input("Enter yoga pose description:", "downward dog", key="yoga_pose_input")
-
-# Generate Code Button
-generate_button = st.button("Generate Code")
-
-# Create a placeholder for the webcam feed
-frame_placeholder = st.empty()
-
-# Start webcam feed and pose validation when Generate Code is clicked
-if generate_button:
-    # Only generate the code once
-    if 'code_generated' not in st.session_state or not st.session_state.code_generated:
-        st.session_state.code_generated = True  # Mark code as generated
-        code = render_generated_code(pose_description)
-        st.code(code, language="python")
+    st.code(code, language="python")
     
-    st.write("Verifying your pose...")
-
-    # Open the webcam feed
-    cap = cv2.VideoCapture(0)
-
-    # Continuously capture frames from the webcam and process the pose
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = pose.process(image)
-
-        if results.pose_landmarks:
-            mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-
-        # Update the webcam feed in Streamlit
-        frame_placeholder.image(frame, channels="BGR", caption="Yoga Pose Verification", use_container_width=True)
-
-        # Display pose status on the frame
-        cv2.putText(frame, 'Pose Correct!', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-
-        # Optional: Add a break condition, e.g., press 'q' to stop the webcam feed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-
+    # Start webcam feed in a separate thread to avoid blocking the UI
+    capture_and_verify_pose(frame_placeholder)
 
 
 
