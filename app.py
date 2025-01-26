@@ -1,4 +1,3 @@
-from subprocess import Popen
 import streamlit as st
 from streamlit.components.v1 import html
 import requests
@@ -6,8 +5,10 @@ import time
 from goal_page import goal_page
 from ai_assistant import render_study_buddy_ai_chat 
 import socket
+from yoga import render_generated_code
+import tempfile
 import os
-
+import subprocess
 
 # Apply the custom gradient background using HTML and CSS
 st.markdown(
@@ -165,8 +166,8 @@ with st.sidebar:
     st.markdown('<div class="sidebar"><h1>LockedIn 👩‍💻</h1></div>', unsafe_allow_html=True)
     st.markdown('<a href="#goal-tracker" class="sidebar">🎯 Goal Tracker</a>', unsafe_allow_html=True)
     st.markdown('<a href="#posture-monitor" class="sidebar">📏 Posture Monitor</a>', unsafe_allow_html=True)
-    st.markdown('<a href="#study-buddy-ai-chat" class="sidebar">🦉 Study Buddy AI Chat</a>', unsafe_allow_html=True)
-    st.markdown('<a href="#genai" class="sidebar">💃 Generate AI Insights</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#yoga-break" class="sidebar">🧘🏻‍♀️Yoga Break</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#study-buddy-ai-chat" class="sidebar">🤖 Study Buddy AI Chat</a>', unsafe_allow_html=True)
 
 
 # Info Section for the Study Hub
@@ -438,18 +439,144 @@ study_timer_input()
 
 
 
-
-
-
-
-
 # Add a section divider here
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 
+import streamlit as st
+import mediapipe as mp
+import cv2
+
+# Setup mediapipe
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose()
+mp_drawing = mp.solutions.drawing_utils
+
+# Function to generate Python code based on pose description
+def render_generated_code(pose_description):
+    return f"""
+import mediapipe as mp
+import cv2
+
+# Setup mediapipe pose model
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose()
+mp_drawing = mp.solutions.drawing_utils
+
+# Open the webcam
+cap = cv2.VideoCapture(0)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Process the frame
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(image)
+
+    # Draw pose landmarks on the frame
+    if results.pose_landmarks:
+        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+    # Display the frame
+    cv2.putText(frame, 'Pose Correct!', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.imshow('Yoga Pose', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+    """
+
+# Streamlit UI setup
+st.header("🧘🏻‍♀️ YOGA BREAK", anchor="yoga-break")
+st.write("Chat with Echo, your AI study assistant, to get personalized help with academic queries.")
+st.markdown('<div id="d3f4e54a"></div>', unsafe_allow_html=True)
+
+# Yoga Pose Code Generator Section
+st.title("Yoga Pose Code Generator")
+
+# Description of the app
+st.write("Enter the yoga pose description, and I will generate Python code to verify if you're performing it correctly using mediapipe and OpenCV!")
+
+# Input box for pose description with a unique key
+pose_description = st.text_input("Enter yoga pose description:", "downward dog", key="yoga_pose_input")
+
+# Generate Code Button
+generate_button = st.button("Generate Code")
+
+# Create a placeholder for the webcam feed
+frame_placeholder = st.empty()
+
+# Start webcam feed and pose validation when Generate Code is clicked
+if generate_button:
+    # Only generate the code once
+    if 'code_generated' not in st.session_state or not st.session_state.code_generated:
+        st.session_state.code_generated = True  # Mark code as generated
+        code = render_generated_code(pose_description)
+        st.code(code, language="python")
+    
+    st.write("Verifying your pose...")
+
+    # Open the webcam feed
+    cap = cv2.VideoCapture(0)
+
+    # Continuously capture frames from the webcam and process the pose
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(image)
+
+        if results.pose_landmarks:
+            mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+        # Update the webcam feed in Streamlit
+        frame_placeholder.image(frame, channels="BGR", caption="Yoga Pose Verification", use_container_width=True)
+
+        # Display pose status on the frame
+        cv2.putText(frame, 'Pose Correct!', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+        # Optional: Add a break condition, e.g., press 'q' to stop the webcam feed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+
+
+
+
+
+
+
+
+
+
+# # Generate Code Button
+# if st.button("Generate Code"):
+    if pose_description:
+        # Generate the Python code for the pose
+        generated_code = render_generated_code(pose_description)
+        
+        # Debugging: Show the generated code (remove this later)
+        st.write("Generated Python code:")
+        st.code(generated_code)
+        
+        # Save the generated code to session state
+        st.session_state.generated_code = generated_code
+
+    else:
+        st.error("Please enter a yoga pose description.")
+
+
+        
 
 # Study Buddy AI Chat Section
-st.header("🦉 Study Buddy AI Chat", anchor="study-buddy-ai-chat")
+st.header("🤖 Study Buddy AI Chat", anchor="study-buddy-ai-chat")
 st.write("Chat with Echo, your AI study assistant, to get personalized help with academic queries.")
 st.markdown('<div id="d3f4e54a"></div>', unsafe_allow_html=True)
 st.markdown(
@@ -467,19 +594,6 @@ st.markdown(
 
 render_study_buddy_ai_chat()
 
-
-# Add a section divider here
-st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-
-# GenAI Integration Section (new section for calling genAi.py)
-st.header("💃 Get Moving AI Generate a Stretch Guide", anchor="genai")
-st.write("Generate a stetch guide using the AI model. Click below to run the AI generation script. [BETA feature]")
-# Add a button to run genAi.py
-if st.button("Run AI Generation"):
-    # Run the Python script `genAi.py` (assuming it exists in your working directory)
-    process = Popen(['python', 'genAi.py'], cwd=os.getcwd())
-    process.wait()  # Wait for the process to finish before proceeding
-    st.write("AI Generation is complete!")
 
 # Add a section divider here
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -581,3 +695,12 @@ if __name__ == "__main__":
         print(f"Port {port} is in use. Trying port {port + 1}...")
         port += 1
     app.run(host="0.0.0.0", port=port)
+
+
+
+    
+    
+    
+   
+   
+   
