@@ -419,6 +419,10 @@ def video_feed():
     cap.release()
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+with open('./files/wave.css') as f:
+    css = f.read()
+
+st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

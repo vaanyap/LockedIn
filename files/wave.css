@@ -1,0 +1,49 @@
+.stApp > header {
+    background-color: transparent;
+}
+
+.stApp {
+    margin: auto;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: auto;
+    background: rgb(191,216,255);
+    background: -moz-linear-gradient(45deg, rgba(191,216,255,1) 0%, rgba(220,242,238,1) 34%, rgba(216,184,255,1) 100%);
+    background: -webkit-linear-gradient(45deg, rgba(191,216,255,1) 0%, rgba(220,242,238,1) 34%, rgba(216,184,255,1) 100%);
+    background: linear-gradient(45deg, rgba(191,216,255,1) 0%, rgba(220,242,238,1) 34%, rgba(216,184,255,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#bfd8ff",endColorstr="#d8b8ff",GradientType=1);
+    animation: gradient 15s ease infinite;
+    background-size: 100% 100%;
+    background-attachment: fixed;
+    
+    font-size: 18px; /* Increased base font size for all text */
+}
+
+/* Optional: Increase specific text elements for more visibility */
+.stApp h1, .stApp h2, .stApp h3 {
+    font-size: 40px;  /* Increase heading size */
+}
+
+.stApp p, .stApp span {
+    font-size: 20px;  /* Slightly increase paragraph and span text */
+}
+
+/* Button styling */
+.stButton button {
+    background-color: #8db8fb; /* Normal button color */
+    color: white;  /* Text color */
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.stButton button:hover {
+    background-color: #bcd6ff; /* Hover button color */
+}
+
+/* Optional: Make button text larger */
+.stButton button {
+    font-size: 1.2em;
+}
