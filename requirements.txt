@@ -7,6 +7,6 @@ streamlit
 vertexai
 google.cloud
 mediapipe==0.10.20
-opencv
+opencv-python
 numpy
 pygame
