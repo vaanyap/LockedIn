@@ -8,6 +8,7 @@ import socket
 from yoga import render_generated_code
 import tempfile
 import os
+import subprocess
 
 # Apply the custom gradient background using HTML and CSS
 st.markdown(
@@ -442,8 +443,54 @@ study_timer_input()
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 
+import streamlit as st
+import mediapipe as mp
+import cv2
 
-# Study Buddy AI Chat Section
+# Setup mediapipe
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose()
+mp_drawing = mp.solutions.drawing_utils
+
+# Function to generate Python code based on pose description
+def render_generated_code(pose_description):
+    return f"""
+import mediapipe as mp
+import cv2
+
+# Setup mediapipe pose model
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose()
+mp_drawing = mp.solutions.drawing_utils
+
+# Open the webcam
+cap = cv2.VideoCapture(0)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Process the frame
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(image)
+
+    # Draw pose landmarks on the frame
+    if results.pose_landmarks:
+        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+    # Display the frame
+    cv2.putText(frame, 'Pose Correct!', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.imshow('Yoga Pose', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+    """
+
+# Streamlit UI setup
 st.header("🧘🏻‍♀️ YOGA BREAK", anchor="yoga-break")
 st.write("Chat with Echo, your AI study assistant, to get personalized help with academic queries.")
 st.markdown('<div id="d3f4e54a"></div>', unsafe_allow_html=True)
@@ -454,32 +501,79 @@ st.title("Yoga Pose Code Generator")
 # Description of the app
 st.write("Enter the yoga pose description, and I will generate Python code to verify if you're performing it correctly using mediapipe and OpenCV!")
 
-# Input box for pose description
-pose_description = st.text_input("Enter yoga pose description:", "downward dog")
+# Input box for pose description with a unique key
+pose_description = st.text_input("Enter yoga pose description:", "downward dog", key="yoga_pose_input")
 
-# Button to generate and run code
-if st.button("Generate and Run Code"):
+# Generate Code Button
+generate_button = st.button("Generate Code")
+
+# Create a placeholder for the webcam feed
+frame_placeholder = st.empty()
+
+# Start webcam feed and pose validation when Generate Code is clicked
+if generate_button:
+    # Only generate the code once
+    if 'code_generated' not in st.session_state or not st.session_state.code_generated:
+        st.session_state.code_generated = True  # Mark code as generated
+        code = render_generated_code(pose_description)
+        st.code(code, language="python")
+    
+    st.write("Verifying your pose...")
+
+    # Open the webcam feed
+    cap = cv2.VideoCapture(0)
+
+    # Continuously capture frames from the webcam and process the pose
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(image)
+
+        if results.pose_landmarks:
+            mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+        # Update the webcam feed in Streamlit
+        frame_placeholder.image(frame, channels="BGR", caption="Yoga Pose Verification", use_container_width=True)
+
+        # Display pose status on the frame
+        cv2.putText(frame, 'Pose Correct!', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+        # Optional: Add a break condition, e.g., press 'q' to stop the webcam feed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+
+
+
+
+
+
+
+
+
+
+# # Generate Code Button
+# if st.button("Generate Code"):
     if pose_description:
         # Generate the Python code for the pose
         generated_code = render_generated_code(pose_description)
         
-        # Use tempfile to save and execute the generated code
-        with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.py') as temp_file:
-            temp_file.write(generated_code)  # Write generated code to temp file
-            temp_file_path = temp_file.name  # Get the path of the temp file
+        # Debugging: Show the generated code (remove this later)
+        st.write("Generated Python code:")
+        st.code(generated_code)
+        
+        # Save the generated code to session state
+        st.session_state.generated_code = generated_code
 
-            try:
-                # Run the generated code without showing it
-                result = os.system(f"python {temp_file_path}")  # Execute the code
-                if result != 0:
-                    st.error("Error running the generated code.")
-            except Exception as e:
-                st.error(f"Error running generated code: {e}")
-            finally:
-                # Optional: clean up the temporary file after execution
-                os.remove(temp_file_path)
     else:
         st.error("Please enter a yoga pose description.")
+
+
+        
 
 # Study Buddy AI Chat Section
 st.header("🤖 Study Buddy AI Chat", anchor="study-buddy-ai-chat")
