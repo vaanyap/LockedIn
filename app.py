@@ -83,7 +83,7 @@ st.markdown(
 
 
 # Define the Flask Backend URL
-FLASK_BACKEND_URL = "http://127.0.0.1:5000"  # Update this to your actual backend URL
+FLASK_BACKEND_URL = "http://127.0.0.1:5000/"  # Update this to your actual backend URL
 
 
 
@@ -473,21 +473,21 @@ def capture_and_verify_pose(frame_placeholder):
 
         if results.pose_landmarks:
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-            flipped_frame = cv2.flip(frame, 1)
+            
             # Pose validation (simplified for demonstration)
             landmarks = results.pose_landmarks.landmark
             if landmarks[11].y < landmarks[12].y:  # Example: check for Downward Dog pose
                 pose_status = "Pose Correct!"
-                flipped_frame = cv2.putText(flipped_frame, pose_status, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                frame = cv2.putText(frame, pose_status, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
             else:
                 pose_status = "Incorrect Pose"
-                flipped_frame = cv2.putText(flipped_frame, pose_status, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                frame = cv2.putText(frame, pose_status, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
         # Horizontally flip the image (not the text)
         
 
         # Display webcam feed with pose status in Streamlit
-        frame_placeholder.image(flipped_frame, channels="BGR", caption="Yoga Pose Verification", use_container_width=True)
+        frame_placeholder.image(frame, channels="BGR", caption="Yoga Pose Verification", use_container_width=True)
 
     cap.release()
 
