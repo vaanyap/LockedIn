@@ -1,3 +1,5 @@
+**LockedIN**
+
 **Live Posture Tracking & Productivity Insights**
 
 This project implements a real-time posture tracking system with personalized productivity insights. It leverages MediaPipe for posture detection, integrates Gemini for contextual feedback, and uses GCP for cloud-based inference and analytics.
