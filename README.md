@@ -11,7 +11,8 @@ Contextual Feedback & Productivity Insights:
 - Integrates Gemini to analyze posture events and provide personalized productivity suggestions via prompt engineering.
 Cloud Backend:
 - Lightweight backend deployed on Google Cloud Platform (GCP) to handle inference requests, store analytics, and enable downstream applications.
-- 
+
+
 **Tech Stack**
 MediaPipe: Real-time body pose detection.
 Gemini: Contextual analysis and personalized feedback.
