@@ -3,7 +3,7 @@ from vertexai.generative_models import GenerativeModel
 import re
 
 # Initialize Vertex AI
-PROJECT_ID = "lockedin-448906"
+
 vertexai.init(project=PROJECT_ID, location="us-central1")
 
 # Initialize the generative model
