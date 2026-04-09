@@ -1,3 +1,10 @@
+import os
+import sys
+
+if __name__ == "__main__" and os.environ.get("LOCKEDIN_STREAMLIT_BOOTSTRAPPED") != "1":
+    os.environ["LOCKEDIN_STREAMLIT_BOOTSTRAPPED"] = "1"
+    os.execv(sys.executable, [sys.executable, "-m", "streamlit", "run", __file__])
+
 import streamlit as st
 from streamlit.components.v1 import html
 import requests
@@ -7,7 +14,6 @@ from ai_assistant import render_study_buddy_ai_chat
 import socket
 from yoga import render_generated_code
 import tempfile
-import os
 import subprocess
 
 # Apply the custom gradient background using HTML and CSS
@@ -82,8 +88,39 @@ st.markdown(
 )
 
 
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        return sock.connect_ex(("127.0.0.1", port)) == 0
+
+
+def is_lockedin_backend(url):
+    try:
+        response = requests.get(url, timeout=0.5)
+    except requests.RequestException:
+        return False
+
+    return response.ok and "Pose Detection" in response.text
+
+
+def resolve_backend_url():
+    configured_url = os.environ.get("LOCKEDIN_BACKEND_URL")
+    if configured_url:
+        return configured_url.rstrip("/") + "/"
+
+    default_url = "http://127.0.0.1:5000/"
+    fallback_url = "http://127.0.0.1:5001/"
+
+    if is_lockedin_backend(default_url):
+        return default_url
+
+    if is_port_in_use(5000):
+        return fallback_url
+
+    return default_url
+
+
 # Define the Flask Backend URL
-FLASK_BACKEND_URL = "http://127.0.0.1:5000/"  # Update this to your actual backend URL
+FLASK_BACKEND_URL = resolve_backend_url()
 
 
 
@@ -690,17 +727,6 @@ with open('./files/wave.css') as f:
     css = f.read()
 
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
-
-def is_port_in_use(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(("0.0.0.0", port)) == 0
-
-if __name__ == "__main__":
-    port = 5000
-    while is_port_in_use(port):
-        print(f"Port {port} is in use. Trying port {port + 1}...")
-        port += 1
-    app.run(host="0.0.0.0", port=port)
 
 
 

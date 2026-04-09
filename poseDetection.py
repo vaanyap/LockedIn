@@ -127,7 +127,7 @@ def generate_frames():
 
             # New check for chin too close to chest
             chin_to_chest_distance = calculate_distance(nose, left_shoulder)
-            if chin_to_chest_distance < 0.2:  # Threshold for leaning forward
+            if chin_to_chest_distance < 0.4:  # Threshold for leaning forward
                 bad_posture = True
                 posture_text = "Bad posture: Chin too close to chest"
                 

@@ -1,0 +1,187 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LockedIn | Applied AI Study Assistant</title>
+    <meta name="description" content="LockedIn is a student productivity project that combines goal tracking, live posture monitoring, yoga pose generation, and optional Gemini-powered study support.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="site-header">
+            <div class="brand">LockedIn</div>
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#deploy">Deploy</a>
+                <a href="#resume">Resume</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero-grid">
+                <div class="hero-copy">
+                    <p class="eyebrow">Applied AI product demo</p>
+                    <h1>Study support, posture awareness, and AI assistance in one project.</h1>
+                    <p class="lede">
+                        LockedIn combines a Streamlit dashboard, a Flask posture-monitoring service, MediaPipe pose tracking,
+                        and optional Gemini-backed features. This Vercel deployment is the portfolio-friendly showcase layer,
+                        while the full webcam experience continues to run locally.
+                    </p>
+                    <div class="cta-row">
+                        <a class="button primary" href="#deploy">Deploy on Vercel</a>
+                        <a class="button secondary" href="#local-run">Run full app locally</a>
+                    </div>
+                    <div class="metric-row">
+                        <article class="metric-card">
+                            <span class="metric-label">Modes</span>
+                            <strong>4 integrated tools</strong>
+                        </article>
+                        <article class="metric-card">
+                            <span class="metric-label">Core stack</span>
+                            <strong>Streamlit + Flask + MediaPipe</strong>
+                        </article>
+                        <article class="metric-card">
+                            <span class="metric-label">Deployment split</span>
+                            <strong>Vercel showcase, local AI runtime</strong>
+                        </article>
+                    </div>
+                </div>
+
+                <aside class="hero-panel">
+                    <div class="panel-card showcase-card">
+                        <img src="src/echoTheOwl.png" alt="Echo owl mascot" class="owl-image">
+                        <div class="status-pill">Portfolio Ready</div>
+                        <h2>What runs on Vercel</h2>
+                        <p>A polished presentation layer with product framing, architecture, setup guidance, and resume-ready talking points.</p>
+                    </div>
+                    <div class="panel-card runtime-card">
+                        <h3>What stays local</h3>
+                        <ul>
+                            <li>Webcam posture detection</li>
+                            <li>Live video streaming</li>
+                            <li>MediaPipe inference pipeline</li>
+                            <li>Optional Vertex AI credential flow</li>
+                        </ul>
+                    </div>
+                </aside>
+            </section>
+
+            <section id="features" class="content-section">
+                <div class="section-heading">
+                    <p class="eyebrow">Feature set</p>
+                    <h2>Built as a full product, not just a model demo</h2>
+                </div>
+                <div class="feature-grid">
+                    <article class="feature-card">
+                        <h3>Goal Tracker</h3>
+                        <p>Students can define goals, manage tasks, and keep one dashboard focused on actual study execution.</p>
+                    </article>
+                    <article class="feature-card">
+                        <h3>Posture Monitor</h3>
+                        <p>A live Flask service streams webcam posture feedback using MediaPipe landmarks and OpenCV.</p>
+                    </article>
+                    <article class="feature-card">
+                        <h3>Yoga Break Generator</h3>
+                        <p>Natural-language prompts generate starter pose-checking code, with a fallback experience when cloud AI is unavailable.</p>
+                    </article>
+                    <article class="feature-card">
+                        <h3>Study Buddy AI</h3>
+                        <p>Optional Gemini-backed workflows support text, image, and video prompts without blocking the rest of the app.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section id="architecture" class="content-section two-column-section">
+                <div>
+                    <p class="eyebrow">Architecture</p>
+                    <h2>Deployment-aware split</h2>
+                    <p class="body-copy">
+                        Vercel is a good fit for a public-facing project page, but not for a persistent webcam stream or server-side MediaPipe runtime.
+                        The project therefore uses a two-surface approach: a deployable static showcase for the web, and a richer local application for the interactive computer-vision workflows.
+                    </p>
+                </div>
+                <div class="stack-card">
+                    <div class="stack-row">
+                        <span>Vercel layer</span>
+                        <strong>Static HTML + CSS portfolio site</strong>
+                    </div>
+                    <div class="stack-row">
+                        <span>Local dashboard</span>
+                        <strong>Streamlit application</strong>
+                    </div>
+                    <div class="stack-row">
+                        <span>Posture service</span>
+                        <strong>Flask + MediaPipe + OpenCV</strong>
+                    </div>
+                    <div class="stack-row">
+                        <span>Optional AI</span>
+                        <strong>Vertex AI + Google Cloud Storage</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section id="deploy" class="content-section deploy-section">
+                <div class="section-heading">
+                    <p class="eyebrow">Deployment</p>
+                    <h2>How to deploy this repo on Vercel</h2>
+                </div>
+                <div class="deploy-grid">
+                    <article class="deploy-card">
+                        <span class="step-number">1</span>
+                        <h3>Import the GitHub repo</h3>
+                        <p>Create a new Vercel project and import this repository directly from GitHub.</p>
+                    </article>
+                    <article class="deploy-card">
+                        <span class="step-number">2</span>
+                        <h3>Use the default static setup</h3>
+                        <p>No framework preset is required. Vercel will serve the root static files defined in this repository.</p>
+                    </article>
+                    <article class="deploy-card">
+                        <span class="step-number">3</span>
+                        <h3>Publish the showcase layer</h3>
+                        <p>The deployed site explains the project clearly, while the full webcam and AI runtime remains a local demo path.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section id="local-run" class="content-section local-run-section">
+                <div class="section-heading">
+                    <p class="eyebrow">Local runtime</p>
+                    <h2>How to run the full project</h2>
+                </div>
+                <div class="code-panel">
+                    <pre><code>python3.10 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+python poseDetection.py
+streamlit run app.py</code></pre>
+                </div>
+            </section>
+
+            <section id="resume" class="content-section resume-section">
+                <div class="section-heading">
+                    <p class="eyebrow">Resume framing</p>
+                    <h2>Claims you can defend in an interview</h2>
+                </div>
+                <div class="resume-grid">
+                    <article class="resume-card">
+                        <p>Built a student productivity platform that combined goal tracking, posture monitoring, and AI-assisted study workflows.</p>
+                    </article>
+                    <article class="resume-card">
+                        <p>Integrated MediaPipe and OpenCV into a live posture-monitoring pipeline using webcam pose landmarks.</p>
+                    </article>
+                    <article class="resume-card">
+                        <p>Designed the project to separate its public deployment layer from its heavier local inference runtime for better reliability.</p>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html> -->
