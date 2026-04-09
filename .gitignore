@@ -1,5 +1,5 @@
-google-cloud-sdk/
 __pycache__/
+google-cloud-sdk/
 *.pyc
 *.pyo
 *.pyd
