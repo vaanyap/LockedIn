@@ -2,6 +2,10 @@
 
 LockedIn is a student productivity dashboard that combines goal tracking, live posture monitoring, and optional Gemini-powered academic support. The project is meant to show applied AI product work rather than a single isolated model demo.
 
+CHECK OUR DEVPOST:
+**https://devpost.com/software/lockedin-k35v4y**
+
+
 ## What it includes
 
 - A Streamlit dashboard for goals, focus, and study support.
